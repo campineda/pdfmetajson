@@ -1,0 +1,23 @@
+# Virtual Environment
+venv/
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE specific files (PyCharm)
+.idea/
+
+# Local configuration files (if any)
+# .env
+
+# Dependency files (if you use handlers like pipenv or poetry)
+# Pipfile.lock
+# poetry.lock
+
+# Operating system files
+.DS_Store
+Thumbs.db
