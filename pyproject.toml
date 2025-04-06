@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PdfMetaJson"
+version = "0.1.0"
+description = "Python command utility to scan PDF files from a path and extract metadata and some content from them into a Json file."
+readme = "README.md"
+requires-python = ">=3.13"
+license = {text = "MIT"}
+authors = [
+    {name = "Camilo Pineda", email = "69707898+campineda@users.noreply.github.com" }
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/campineda/pdfmetajson"
+Repository = "https://github.com/campineda/pdfmetajson"
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "black",
+    "isort",
+    # Añade aquí otras herramientas de desarrollo que uses, ej:
+    # "pytest",
+    # "mypy",
+]
+
+[tool.black]
+line-length = 88
+# include = ... (si necesitas especificar inclusiones/exclusiones)
+# exclude = ...
+
+[tool.isort]
+profile = "black"
+line_length = 88 # Asegúrate que coincida con Black
+
+[tool.flake8]
+max-line-length = 88 # Asegúrate que coincida con Black/isort
+extend-ignore = [
+    "E203",
+    "W503",
+]
+# exclude = [ ... ]
+# max-complexity = 10

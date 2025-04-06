@@ -18,6 +18,9 @@ __pycache__/
 # Pipfile.lock
 # poetry.lock
 
+# Python building artifacts
+/PdfMetaJson.egg-info/
+
 # Operating system files
 .DS_Store
 Thumbs.db
