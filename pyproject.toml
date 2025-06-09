@@ -12,7 +12,9 @@ license = {text = "MIT"}
 authors = [
     {name = "Camilo Pineda", email = "69707898+campineda@users.noreply.github.com" }
 ]
-dependencies = []
+dependencies = [
+    "Unidecode~=1.4.0"
+]
 
 [project.urls]
 Homepage = "https://github.com/campineda/pdfmetajson"
@@ -23,22 +25,21 @@ dev = [
     "flake8",
     "black",
     "isort",
-    # Añade aquí otras herramientas de desarrollo que uses, ej:
     # "pytest",
     # "mypy",
 ]
 
 [tool.black]
 line-length = 88
-# include = ... (si necesitas especificar inclusiones/exclusiones)
+# include = ...
 # exclude = ...
 
 [tool.isort]
 profile = "black"
-line_length = 88 # Asegúrate que coincida con Black
+line_length = 88
 
 [tool.flake8]
-max-line-length = 88 # Asegúrate que coincida con Black/isort
+max-line-length = 88
 extend-ignore = [
     "E203",
     "W503",
