@@ -57,8 +57,8 @@ class CommandLineInterface:
         )
         # Max Files
         parser.add_argument(
-            "-m",
-            "--maxFiles",
+            "-n",
+            "--numfiles",
             nargs="?",
             type=int,
             default=0,
@@ -116,10 +116,10 @@ class CommandLineInterface:
             if not os.access(path, os.R_OK):
                 self.parser.error(f"Input path is not readable: {args.path}")
 
-        # Validate max_files argument
-        if args.max_files is not None:
-            if args.max_files <= 0:
-                self.parser.error("max-files must be a positive integer")
+        # Validate numfiles argument
+        if args.numfiles is not None:
+            if args.numfiles < 0:
+                self.parser.error("numfiles must be a positive integer")
 
         # Validate limit argument
         if args.limit <= 0:

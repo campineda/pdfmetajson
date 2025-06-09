@@ -13,7 +13,8 @@ authors = [
     {name = "Camilo Pineda", email = "69707898+campineda@users.noreply.github.com" }
 ]
 dependencies = [
-    "Unidecode~=1.4.0"
+    "Unidecode~=1.4.0",
+    "pypdf>=5.6.0"
 ]
 
 [project.urls]

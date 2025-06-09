@@ -9,6 +9,7 @@ PACKAGE_NAME = "PdfMetaJson"
 def main():
     cli = CommandLineInterface(PACKAGE_NAME)
     args = cli.parse_arguments()
+    cli.show_banner()
     print("Args: ")
     print(args)
 

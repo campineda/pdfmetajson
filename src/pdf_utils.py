@@ -1,4 +1,4 @@
-# Utilitario para convertir las fechas extraidas del PDF a un objeto datetime
+"""Various utilities for processing, cleaning, transforming data found in PDFs"""
 
 import datetime
 import logging
