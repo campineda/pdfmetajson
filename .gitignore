@@ -20,6 +20,7 @@ __pycache__/
 
 # Python building artifacts
 /PdfMetaJson.egg-info/
+src/PdfMetaJson.egg-info/
 
 # Operating system files
 .DS_Store
