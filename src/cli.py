@@ -53,7 +53,7 @@ class CommandLineInterface:
             "path",
             nargs="?",
             default=".",
-            help="take the path to the target directory (default: %(default)s)",
+            help="Input directory to scan .PDF files (default: %(default)s)",
         )
         # Max Files
         parser.add_argument(

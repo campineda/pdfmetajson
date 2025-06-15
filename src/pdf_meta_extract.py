@@ -1,12 +1,10 @@
-import logging
 import os
 from datetime import datetime
 
 from pypdf import PdfReader
 
 import pdf_utils
-
-logger = logging.getLogger(__name__)
+from logger import get_logger
 
 
 class PdfMetadataExtractor:
@@ -22,13 +20,16 @@ class PdfMetadataExtractor:
         self.num_pages = ""
         self.metadata = {}
         self.content = ""
+        self.logger = get_logger()
 
     def process(self, file_num=0):
         try:
             with open(self.file_path, "rb") as f:
                 self.file_name = os.path.basename(self.file_path)
                 file_num_text = f" #{file_num}" if file_num > 0 else ""
-                logger.info(f"Processing file{file_num_text}: '{self.file_path}'...")
+                self.logger.info(
+                    f"Processing file{file_num_text}: '{self.file_path}'..."
+                )
                 reader = PdfReader(f)
                 self.metadata = self._extract_metadata(reader) or None
                 self._extract_content(reader)
@@ -53,24 +54,24 @@ class PdfMetadataExtractor:
                 pdf_info["content_sample"] = self.content
             return pdf_info
         except PermissionError:
-            logger.error(
+            self.logger.error(
                 f"You do not have permission to read the file {self.file_name}"
             )
             return None
         except FileNotFoundError:
-            logger.error(f"File {self.file_name} not found")
+            self.logger.error(f"File {self.file_name} not found")
             return None
         except IsADirectoryError:
-            logger.error("The specified path is a directory, not a file.")
+            self.logger.error("The specified path is a directory, not a file.")
             return None
         except IOError as e:
-            logger.error(f"An I/O error occurred: : {e}")
+            self.logger.error(f"An I/O error occurred: : {e}")
             return None
 
     def _extract_metadata(self, reader):
         metadata = {}
         if reader.metadata is None:
-            logger.debug(f"Could not read metadata from file {self.file_name} ")
+            self.logger.debug(f"Could not read metadata from file {self.file_name} ")
             return metadata
         if reader.metadata.author is not None:
             metadata["author"] = reader.metadata.author
@@ -106,8 +107,8 @@ class PdfMetadataExtractor:
 
         while keep_reading:
             page = reader.pages[page_num - 1]
-            # logger.debug("page_" + str(page_num) + ":\n" + page.extract_text())
-            # logger.debug("page_clean_" + str(page_num) + ":\n" + pdf_clean_text.clean_text(page.extract_text()))
+            # self.logger.debug("page_" + str(page_num) + ":\n" + page.extract_text())
+            # self.logger.debug("page_clean_" + str(page_num) + ":\n" + pdf_clean_text.clean_text(page.extract_text()))
             page_text = pdf_utils.clean_text(page.extract_text())[
                 : PdfMetadataExtractor.MAX_CHARS_PER_PAGE
             ]
@@ -144,7 +145,7 @@ class PdfMetadataExtractor:
     def _parse_date(self, pdf_date_raw, date_name):
         pdf_date = pdf_utils.convert_date(str(pdf_date_raw))
         if pdf_date is None:
-            logger.debug(
+            self.logger.debug(
                 f"Date Conversion Error in File '{self.file_name}': '{date_name}' could not be converted. "
                 f"We get '{pdf_date}' ({type(pdf_date)}), so we use '{str(pdf_date_raw)}'."
             )
