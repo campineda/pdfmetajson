@@ -1,10 +1,10 @@
+import logging
 import os
 from datetime import datetime
 
 from pypdf import PdfReader
 
 import pdf_utils
-from logger import get_logger
 
 
 class PdfMetadataExtractor:
@@ -20,7 +20,7 @@ class PdfMetadataExtractor:
         self.num_pages = ""
         self.metadata = {}
         self.content = ""
-        self.logger = get_logger()
+        self.logger = logging.getLogger(__name__)
 
     def process(self, file_num=0):
         try:
@@ -71,7 +71,9 @@ class PdfMetadataExtractor:
     def _extract_metadata(self, reader):
         metadata = {}
         if reader.metadata is None:
-            self.logger.debug(f"Could not read metadata from file {self.file_name} ")
+            self.logger.warning(
+                f"We couldn't access the metadata from file: '{self.file_name}' !"
+            )
             return metadata
         if reader.metadata.author is not None:
             metadata["author"] = reader.metadata.author

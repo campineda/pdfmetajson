@@ -3,11 +3,8 @@ import logging
 import os
 from pathlib import Path
 
-from logger import configure_logging
 from src.pdf_meta_extract import PdfMetadataExtractor
 from validators import PathValidator, ValidationError
-
-logger = logging.getLogger(__name__)
 
 
 class PdfMetaJson:
@@ -19,12 +16,8 @@ class PdfMetaJson:
         record_limit=5,
         max_initial_pages=2,
         max_final_pages=1,
-        verbose=False,
-        quiet=False,
     ):
-        self.logger = configure_logging(
-            verbose=verbose, quiet=quiet, name=self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__)
         self.logger.debug(
             __name__
             + "(input_dir='"
@@ -37,10 +30,6 @@ class PdfMetaJson:
             + str(max_initial_pages)
             + "',max_final_pages='"
             + str(max_final_pages)
-            + "',verbose='"
-            + str(verbose)
-            + "',quiet='"
-            + str(quiet)
             + "')"
         )
         self.input_dir = input_dir

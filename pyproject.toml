@@ -14,7 +14,8 @@ authors = [
 ]
 dependencies = [
     "Unidecode~=1.4.0",
-    "pypdf>=5.6.0"
+    "pypdf>=5.6.0",
+    "colorlog>=6.9.0"
 ]
 
 [project.urls]
