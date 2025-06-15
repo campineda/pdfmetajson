@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "Camilo Pineda", email = "69707898+campineda@users.noreply.github.com" }
+    {name = "Camilo A. Pineda R.", email = "69707898+campineda@users.noreply.github.com" }
 ]
 dependencies = [
     "Unidecode~=1.4.0",
