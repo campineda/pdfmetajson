@@ -122,8 +122,9 @@ class CommandLineInterface:
                 self.parser.error("numfiles must be a positive integer")
 
         # Validate limit argument
-        if args.limit <= 0:
-            self.parser.error("limit must be a positive integer")
+        if args.limit is not None:
+            if args.limit < 0:
+                self.parser.error("limit must be a positive integer")
 
     def show_banner(self):
         print(f"\n{self.app_name} v{self.app_version}")

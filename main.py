@@ -15,8 +15,9 @@ def main():
     try:
         cli = CommandLineInterface(PACKAGE_NAME)
         args = cli.parse_arguments()
-        cli.show_banner()
         configure_logging(verbose=args.verbose, quiet=args.quiet)
+        if not args.quiet:
+            cli.show_banner()
         pdf_meta_to_json = PdfMetaJson(
             input_dir=args.path, max_num_files=args.numfiles, record_limit=args.limit
         )

@@ -83,7 +83,7 @@ def sanityze(text):
     # Replace accented characters with normal versions in only the leading letters of A-Z
     text = unidecode(text)
     # Replace repeated characters
-    text = clean_repeted_chars(text)
+    # text = clean_repeted_chars(text)
     # Replace special characters
     text = text.replace("/uni00A0", " ")
     text = text.replace("/G84/G84", "- ")
@@ -141,7 +141,7 @@ def clean_index_text(text):
     :param text: text to fix
     :return:
     """
-    pattern = r"(.*?)\s*([.\s_-]{3,})\s*(\d+)"
+    pattern = r"^(.*?)\s*[.\s_-]{3,}\s*(\d+)$"
 
     def process_match(match):
         title = match.group(1).strip()
@@ -150,11 +150,15 @@ def clean_index_text(text):
         if not title or title.isdigit():
             return match.group(0)
         # De lo contario devolvemos el patron:
-        return f"{title}: {page_num}.\n"
+        return f"{title}: {page_num}."
 
     # Aplicar el reemplazo solo a las líneas que coincidan con el patrón
     lines = text.split("\n")
-    processed_lines = [re.sub(pattern, process_match, line) for line in lines]
+    processed_lines = []
+    for line in lines:
+        # Usamos re-sub con count=1 para asegurarnos de que solo reemplace una vez por línea.
+        processed_line = re.sub(pattern, process_match, line, count=1)
+        processed_lines.append(processed_line)
 
     return "\n".join(processed_lines)
 

@@ -61,5 +61,8 @@ def configure_logging(verbose: bool = False, quiet: bool = False):
 
     root_logger.addHandler(console_handler)
 
+    # Disable Log messages from Libraries
     # Disable warnings from pypdf library
     logging.getLogger("pypdf._reader").setLevel(logging.ERROR)
+    # Disable debug from validator
+    logging.getLogger("validators").setLevel(logging.INFO)

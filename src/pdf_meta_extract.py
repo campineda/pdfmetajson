@@ -10,6 +10,7 @@ import pdf_utils
 class PdfMetadataExtractor:
     MAX_CHARS_PER_PAGE = 700
     MIN_CHARS_PER_PAGE = 5
+    MAX_CONTENT_EXTRACTION_ATTEMPTS = 10
 
     def __init__(self, file_path, max_initial_pages=2, max_final_pages=1):
         self.file_path = file_path
@@ -105,23 +106,40 @@ class PdfMetadataExtractor:
         # Intentamos extraer al menos 2 páginas iniciales con contenido (texto > 5 caracteres)
         page_num = 1
         pages_read = 0
+        total_pages_read = 0
         keep_reading = True
+        num_total_pages = len(reader.pages)
+        tries = 0
 
         while keep_reading:
             page = reader.pages[page_num - 1]
             # self.logger.debug("page_" + str(page_num) + ":\n" + page.extract_text())
             # self.logger.debug("page_clean_" + str(page_num) + ":\n" + pdf_clean_text.clean_text(page.extract_text()))
-            page_text = pdf_utils.clean_text(page.extract_text())[
-                : PdfMetadataExtractor.MAX_CHARS_PER_PAGE
-            ]
+            try:
+                page_text = pdf_utils.clean_text(page.extract_text())[
+                    : PdfMetadataExtractor.MAX_CHARS_PER_PAGE
+                ]
+            except Exception as e:
+                self.logger.debug(
+                    f"We can't get contents for the file for page {page_num}. Error in page.extract_text: {e}"
+                )
+                page_text = ""
             if len(page_text) > PdfMetadataExtractor.MIN_CHARS_PER_PAGE:
                 pdf_pages["page_" + str(page_num)] = page_text
                 pages_read += 1
-            if pages_read == self.max_initial_pages or page_num == len(reader.pages):
+            else:
+                tries += 1
+            if (
+                pages_read == self.max_initial_pages
+                or page_num == num_total_pages
+                or tries == self.MAX_CONTENT_EXTRACTION_ATTEMPTS
+            ):
                 keep_reading = False
             else:
                 page_num += 1
         last_page_read = page_num
+        total_pages_read = pages_read
+        tries = 0
         # intentamos extraer al menos 1 página final con contenido (texto > 5 caracteres)
         # traemos los ultimos MAX_CHARS_PER_PAGE caracteres
         if page_num < len(reader.pages):
@@ -131,17 +149,31 @@ class PdfMetadataExtractor:
                 keep_reading = True
             while keep_reading:
                 page = reader.pages[page_num - 1]
-                page_text = pdf_utils.clean_text(page.extract_text())[
-                    -PdfMetadataExtractor.MAX_CHARS_PER_PAGE :
-                ]
-
+                try:
+                    page_text = pdf_utils.clean_text(page.extract_text())[
+                        -PdfMetadataExtractor.MAX_CHARS_PER_PAGE :
+                    ]
+                except Exception as e:
+                    self.logger.debug(
+                        f"We can't get contents for the file for page {page_num}. Error in page.extract_text: {e}"
+                    )
+                    page_text = ""
                 if len(page_text) > PdfMetadataExtractor.MIN_CHARS_PER_PAGE:
                     pdf_pages["page_" + str(page_num)] = page_text
                     pages_read += 1
-                if pages_read >= self.max_final_pages or page_num <= last_page_read:
+                else:
+                    tries += 1
+                if (
+                    pages_read >= self.max_final_pages
+                    or page_num <= last_page_read
+                    or tries == self.MAX_CONTENT_EXTRACTION_ATTEMPTS
+                ):
                     keep_reading = False
                 else:
                     page_num -= 1
+        total_pages_read += pages_read
+        if total_pages_read == 0:
+            self.logger.warning(f"Was imposible to get contents for the file.")
         self.content = pdf_pages
 
     def _parse_date(self, pdf_date_raw, date_name):
