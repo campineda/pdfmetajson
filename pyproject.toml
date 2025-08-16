@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PdfMetaJson"
-version = "0.2.1"
+version = "0.3.0"
 description = "Python command utility to scan PDF files from a path and extract metadata and some content from them into a Json file."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -14,7 +14,7 @@ authors = [
 ]
 dependencies = [
     "Unidecode~=1.4.0",
-    "pypdf>=5.6.0",
+    "pypdf>=6.0.0",
     "colorlog>=6.9.0",
     "cryptography>=45.0.6"
 ]
