@@ -16,9 +16,11 @@ def convert_date(date_string, debug=False):
     :param debug: enables detailed debug
     :return:
     """
-    date_regex = r"^D:(\d{4})(\d{2})((\d{2}))?((\d{2})((\d{2})((\d{2}))?)?([zZ]?([+-]?\d{2}(:?\d{2})?)?)?)?$"
+    date_regex = r"^D?:?(\d{4})[-]?(\d{2})[-]?((\d{2}))?((\d{2})((\d{2})((\d{2}))?)?([zZ]?([+-]?\d{2}([-:]?\d{1,2})?)?)?)?$"
 
-    cleaned_text = date_string.replace("'", "").replace("´", "").replace("`", "")
+    cleaned_text = (
+        date_string.replace("'", "").replace("´", "").replace("`", "").replace('"', "")
+    )
     if debug:
         logger.debug(
             f"datetime.convert()\toriginal_text: {date_string}\tclean_text: {cleaned_text}."
@@ -82,14 +84,18 @@ def convert_date(date_string, debug=False):
 def sanityze(text):
     # Replace accented characters with normal versions in only the leading letters of A-Z
     text = unidecode(text)
-    # Replace repeated characters
-    # text = clean_repeted_chars(text)
     # Replace special characters
-    text = text.replace("/uni00A0", " ")
-    text = text.replace("/G84/G84", "- ")
+    text = sanitize_special_characters(text)
     # Removing leading and trailing blanks
     text = text.strip()
 
+    return text
+
+
+def sanitize_special_characters(text):
+    text = text.replace("\\", "\\\\").replace('"', '\\"')
+    text = text.replace("/uni00A0", " ")
+    text = text.replace("/G84/G84", "- ")
     return text
 
 

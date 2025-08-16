@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import traceback
 from pathlib import Path
 
 from src.pdf_meta_extract import PdfMetadataExtractor
@@ -75,6 +76,12 @@ class PdfMetaJson:
                 )
                 self.logger.error(f"Error with file: '{file_path}': {e}")
                 # self.logger.debug(traceback.format_exc())
+                tb_list = traceback.extract_tb(e.__traceback__)
+                archivo, linea, funcion, codigo = tb_list[-1]
+                self.logger.debug(
+                    f"Error in {archivo}, line {linea}, in {funcion}: {codigo!r}"
+                )
+
             num_files += 1
             if 0 < self.max_num_files == num_files:
                 break
@@ -102,6 +109,6 @@ class PdfMetaJson:
         file_path = os.path.join(self.output_path, output_filename)
 
         with open(file_path, "w", encoding="utf-8") as file:
-            file.write(json.dumps(records, ensure_ascii=True))
+            file.write(json.dumps(records, ensure_ascii=False))
 
         self.logger.info(f"Output file: {file_path}")
