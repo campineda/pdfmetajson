@@ -71,7 +71,7 @@ class CommandLineInterface:
             nargs="?",
             type=int,
             default=15,
-            help="Maximum records per JSON file before creating a new one (default: 15)",
+            help="Max records per JSON (default: 15)",
         )
 
         # Verbose or Quite
@@ -112,7 +112,9 @@ class CommandLineInterface:
             if not path.exists():
                 self.parser.error(f"Input path does not exist: {args.path}")
             if not path.is_dir():
-                self.parser.error(f"Input path is not a directory: {args.path}")
+                self.parser.error(
+                    f"Input path is not a directory: {args.path}"
+                )
             if not os.access(path, os.R_OK):
                 self.parser.error(f"Input path is not readable: {args.path}")
 
