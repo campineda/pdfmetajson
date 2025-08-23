@@ -33,12 +33,13 @@ class PdfMetaJson:
             + str(max_final_pages)
             + "')"
         )
-        self.input_dir = input_dir
+        self.input_dir = str(input_dir)
+        # For now, the output directory is the same as the input directory
+        self.output_dir = str(input_dir)
         self.max_num_files = max_num_files
         self.max_initial_pages = max_initial_pages
         self.max_records_per_file = record_limit
         self.max_final_pages = max_final_pages
-        self.output_path = input_dir
         self.file_output_basename = "base"
         self._validate_parameters()
 
@@ -48,7 +49,7 @@ class PdfMetaJson:
             self.input_path = PathValidator.validate_input_directory(self.input_dir)
 
             # Validate output directory
-            self.output_path = PathValidator.validate_output_directory(self.output_path)
+            self.output_path = PathValidator.validate_output_directory(self.output_dir)
 
         except ValidationError as e:
             self.logger.error(f"Validation failed: {e}")
@@ -72,14 +73,18 @@ class PdfMetaJson:
                 num_pdfs_readed += 1
             except Exception as e:
                 self.logger.info(
-                    f"The file '{file_path}' could not be processed by the library. We continue with another one."
+                    f"The file '{file_path}' could not be processed by the library. "
+                    "We continue with another one."
                 )
                 self.logger.error(f"Error with file: '{file_path}': {e}")
                 # self.logger.debug(traceback.format_exc())
                 tb_list = traceback.extract_tb(e.__traceback__)
-                archivo, linea, funcion, codigo = tb_list[-1]
+                error_file_path, error_line_number, error_function, error_code = (
+                    tb_list[-1]
+                )
                 self.logger.debug(
-                    f"Error in {archivo}, line {linea}, in {funcion}: {codigo!r}"
+                    f"Error in {error_file_path}, line {error_line_number}, "
+                    f"in {error_function}: {error_code!r}"
                 )
 
             num_files += 1
@@ -106,7 +111,7 @@ class PdfMetaJson:
 
     def _write_records(self, records, index):
         output_filename = f"{self.file_output_basename}_{index:02d}.json"
-        file_path = os.path.join(self.output_path, output_filename)
+        file_path = os.path.join(self.output_dir, output_filename)
 
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(json.dumps(records, ensure_ascii=False))

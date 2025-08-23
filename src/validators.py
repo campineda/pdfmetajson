@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,8 @@ class ProcessingValidator:
 
         if max_files > total_files:
             logger.warning(
-                f"max_files ({max_files}) exceeds available files ({total_files}). Will process all available files."
+                f"max_files ({max_files}) exceeds available files ({total_files})."
+                " Will process all available files."
             )
             return total_files
 

@@ -8,8 +8,9 @@ __pycache__/
 *.pyo
 *.pyd
 
-# IDE specific files (PyCharm)
+# IDE specific files (PyCharm, VSCode)
 .idea/
+.vscode/
 
 # Local configuration files (if any)
 # .env

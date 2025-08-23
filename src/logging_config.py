@@ -7,7 +7,10 @@ from colorlog import ColoredFormatter
 def _create_formatter(verbose: bool) -> logging.Formatter:
     if verbose:
         # Detailed formar for DEBUG
-        fmt = "[%(asctime)s] %(log_color)s%(levelname)-8s%(reset)s [%(name)s:%(lineno)d] %(message)s"
+        fmt = (
+            "[%(asctime)s] %(log_color)s%(levelname)-8s%(reset)s "
+            "[%(name)s:%(lineno)d] %(message)s"
+        )
         datefmt = "%Y-%m-%d %H:%M:%S"
     else:
         # Simple format for INFO or ERROR
@@ -17,7 +20,7 @@ def _create_formatter(verbose: bool) -> logging.Formatter:
         fmt,
         datefmt=datefmt,
         log_colors={
-            "DEBUG": "yellow",
+            "DEBUG": "light_blue",
             "INFO": "green",  # Use 'white' or 'reset' for default color
             "WARNING": "bold_yellow",
             "ERROR": "red",
@@ -33,7 +36,6 @@ def _create_formatter(verbose: bool) -> logging.Formatter:
 def configure_logging(verbose: bool = False, quiet: bool = False):
     """
     Configures the root logger for the entire application.
-
     This function must be called ONCE at the start of the program.
     """
     if verbose:
@@ -47,7 +49,8 @@ def configure_logging(verbose: bool = False, quiet: bool = False):
     # logging.getLogger(__name__) will inherit this configuration.
     root_logger = logging.getLogger()
 
-    # We prevent multiple handlers from being added if the function is called more than once.
+    # We prevent multiple handlers from being added
+    # if the function is called more than once.
     if root_logger.hasHandlers():
         root_logger.handlers.clear()
 

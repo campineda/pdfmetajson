@@ -16,11 +16,13 @@ def convert_date(date_string, debug=False):
     :param debug: enables detailed debug
     :return:
     """
-    date_regex = r"^D?:?(\d{4})[-]?(\d{2})[-]?((\d{2}))?((\d{2})((\d{2})((\d{2}))?)?([zZ]?([+-]?\d{2}([-:]?\d{1,2})?)?)?)?$"
-
-    cleaned_text = (
-        date_string.replace("'", "").replace("´", "").replace("`", "").replace('"', "")
+    date_regex = (
+        r"^D?:?(\d{4})[-]?(\d{2})[-]?((\d{2}))?"
+        r"((\d{2})((\d{2})((\d{2}))?)?"
+        r"([zZ]?([+-]?\d{2}([-:]?\d{1,2})?)?)?)?$"
     )
+
+    cleaned_text = date_string.replace("'", "").replace("´", "").replace("`", "").replace('"', "")
     if debug:
         logger.debug(
             f"datetime.convert()\toriginal_text: {date_string}\tclean_text: {cleaned_text}."
@@ -39,7 +41,8 @@ def convert_date(date_string, debug=False):
     second = int(match.group(10)) if match.group(10) else 0
     if debug:
         logger.debug(
-            f"year: {year}, month: {month}, day: {day}, hour: {hour}, minute: {minute}, second: {second}"
+            f"year: {year}, month: {month}, day: {day}, "
+            f"hour: {hour}, minute: {minute}, second: {second}"
         )
 
     if match.group(12):
@@ -59,7 +62,10 @@ def convert_date(date_string, debug=False):
 
         if debug:
             logger.debug(
-                f"tz_offset: {tz_offset}, len: {len(tz_offset)}, tz_offset_hours:{tz_offset_hours}, tz_offset_minutes:{tz_offset_minutes}"
+                (
+                    f"tz_offset: {tz_offset}, len: {len(tz_offset)}, "
+                    f"tz_offset_hours: {tz_offset_hours}, tz_offset_minutes: {tz_offset_minutes}"
+                )
             )
         if match.group(12)[0] == "-":
             tz_offset_hours *= -1
@@ -125,24 +131,26 @@ def clean_repeated_text_structures(text):
 
 
 def clean_index_text(text):
-    # This pattern searches for lines containing a title followed by repeated characters and a page number.
-    # Sample text
     """
-    Índice
+    This function cleans the index text in the PDF.
+    It removes unnecessary characters and formats the text.
 
-    Introducción ..................... 1
+    Sample text:
+    Index
 
-    Capítulo 1: Conceptos Básicos
-    1.1 Definiciones ................. 5
-    1.2 Historia ..................... 8
+    Introduction ..................... 1
 
-    Capítulo 2: Aplicaciones Prácticas
-    2.1 Caso de estudio 1 ............ 15
-    2.2 Caso de estudio 2 ............ 22
+    Chapter 1: Basic Concepts
+    1.1 Definitions ................. 5
+    1.2 History ..................... 8
 
-    Conclusiones ..................... 30
+    Chapter 2: Practical Applications
+    2.1 Case Study 1 ............ 15
+    2.2 Case Study 2 ............ 22
 
-    Bibliografía ..................... 32
+    Conclusions ..................... 30
+
+    Bibliography ..................... 32
 
     :param text: text to fix
     :return:
@@ -151,18 +159,19 @@ def clean_index_text(text):
 
     def process_match(match):
         title = match.group(1).strip()
-        page_num = match.group(3)
-        # Si el título está vacío o solo contiene números, lo ignoramos y devolvemos la línea original sin cambios
+        page_num = match.group(2)
+        # If the title is empty or only contains numbers,
+        # we ignore it and return the original line unchanged
         if not title or title.isdigit():
             return match.group(0)
-        # De lo contario devolvemos el patron:
+        # Otherwise we return the pattern:
         return f"{title}: {page_num}."
 
-    # Aplicar el reemplazo solo a las líneas que coincidan con el patrón
+    # We apply the replacement only to the lines that match the pattern
     lines = text.split("\n")
     processed_lines = []
     for line in lines:
-        # Usamos re-sub con count=1 para asegurarnos de que solo reemplace una vez por línea.
+        # We use re.sub with count=1 to ensure that we only replace once per line.
         processed_line = re.sub(pattern, process_match, line, count=1)
         processed_lines.append(processed_line)
 

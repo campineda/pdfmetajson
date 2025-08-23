@@ -16,7 +16,7 @@ A Python command-line utility to extract metadata and content samples from PDF f
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repository-url>
+    git clone https://github.com/campineda/pdfmetajson
     cd PdfMetaJson
     ```
 

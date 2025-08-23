@@ -19,7 +19,9 @@ def main():
         if not args.quiet:
             cli.show_banner()
         pdf_meta_to_json = PdfMetaJson(
-            input_dir=args.path, max_num_files=args.numfiles, record_limit=args.limit
+            input_dir=args.path,
+            max_num_files=args.numfiles,
+            record_limit=args.limit
         )
         pdf_meta_to_json.process_directory()
     except ValidationError as ve:

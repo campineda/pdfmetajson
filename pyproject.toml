@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PdfMetaJson"
-version = "0.4.0"
+version = "0.4.1"
 description = "Python command utility to scan PDF files from a path and extract metadata and some content from them into a Json file."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -33,16 +33,16 @@ dev = [
 ]
 
 [tool.black]
-line-length = 88
+line-length = 100
 # include = ...
 # exclude = ...
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 100
 
 [tool.flake8]
-max-line-length = 88
+max-line-length = 100
 extend-ignore = [
     "E203",
     "W503",
