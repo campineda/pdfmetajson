@@ -26,3 +26,7 @@ src/PdfMetaJson.egg-info/
 # Operating system files
 .DS_Store
 Thumbs.db
+PdfMetaJson.code-workspace
+
+# Local sample PDFs for manual testing (not versioned: size and copyright)
+samples-pdf/
