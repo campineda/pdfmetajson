@@ -30,7 +30,7 @@ black . && isort .
 - `src/pdf_utils.py` — date conversion and text cleaning helpers
 - `src/validators.py` — `ValidationError` and static validator classes
 - `tests/` — unittest suite; `tests/data/` sample PDFs
-- `samples-pdf/` — PDFs and JSON outputs for manual testing and documentation
+- `samples-pdf/` — local PDFs for manual testing; git-ignored (size and copyright), never commit it
 
 ## Conventions
 
@@ -43,3 +43,12 @@ black . && isort .
 - Dependency pins: `>=` for core libraries, `~=` for patch-level compatibility; exact pins only
   when needed for stability.
 - When the CLI or output format changes, update `README.md` (features, usage examples, sample JSON).
+
+## Versioning and changelog
+
+- Semantic Versioning; the single source of the version is `version` in `pyproject.toml`.
+- `CHANGELOG.md` follows Keep a Changelog. Every user-visible change adds an entry under
+  `## [Unreleased]` (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`).
+  Internal-only changes (refactors, tooling) don't need an entry.
+- On release: bump `version`, rename `[Unreleased]` to `[X.Y.Z] - YYYY-MM-DD`, add a new empty
+  `[Unreleased]`, update the compare links at the bottom, and tag the commit `vX.Y.Z`.

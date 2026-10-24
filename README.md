@@ -102,6 +102,10 @@ The script generates one or more JSON files named `out_<directory_name>_XX.json`
 -   colorlog: For adding color to log output.
 -   cryptography: Required by `pypdf` for handling encrypted PDF files.
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the release history.
+
 ## License
 
 This project is licensed under the MIT License.
