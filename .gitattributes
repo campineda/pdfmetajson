@@ -1,0 +1,5 @@
+# Store and check out text files with LF on every OS, regardless of core.autocrlf
+* text=auto eol=lf
+
+# Binary files: never touch line endings
+*.pdf binary

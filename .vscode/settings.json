@@ -12,6 +12,8 @@
             "source.organizeImports": "always"
         }
     },
+    // New files use LF, matching .gitattributes
+    "files.eol": "\n",
     // Auto-format on save
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
