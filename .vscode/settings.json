@@ -28,8 +28,8 @@
         "--line-length=100"
     ],
     "python-envs.pythonProjects": [],
-    // AI agents: AGENTS.md is the shared instructions file (Copilot + Claude Code).
-    // CLAUDE.md only imports AGENTS.md, so Copilot skips it to avoid duplicates.
+    // AI agents: AGENTS.md files (root, src/, tests/) are the shared instructions
+    // for Copilot and Claude Code. Nested AGENTS.md support is experimental in Copilot.
     "chat.useAgentsMdFile": true,
-    "chat.useClaudeMdFile": false
+    "chat.useNestedAgentsMdFiles": true
 }
