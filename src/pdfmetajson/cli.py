@@ -1,4 +1,4 @@
-# src/cli.py
+# src/pdfmetajson/cli.py
 import argparse
 import importlib.metadata
 import os
@@ -16,16 +16,15 @@ class CommandLineInterface:
 
     def _get_app_name(self):
         try:
-            name = importlib.metadata.metadata(self.package_name)["Name"]
-            return name.replace("-", " ").title()
+            return importlib.metadata.metadata(self.package_name)["Name"]
         except (importlib.metadata.PackageNotFoundError, KeyError):
-            return ""
+            return self.package_name
 
     def _get_version(self):
         try:
             return importlib.metadata.version(self.package_name)
         except importlib.metadata.PackageNotFoundError:
-            return ""
+            return "unknown"
 
     def _get_description(self):
         try:
@@ -112,9 +111,7 @@ class CommandLineInterface:
             if not path.exists():
                 self.parser.error(f"Input path does not exist: {args.path}")
             if not path.is_dir():
-                self.parser.error(
-                    f"Input path is not a directory: {args.path}"
-                )
+                self.parser.error(f"Input path is not a directory: {args.path}")
             if not os.access(path, os.R_OK):
                 self.parser.error(f"Input path is not readable: {args.path}")
 

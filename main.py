@@ -1,35 +1,11 @@
 # -*- coding: utf-8 -*-
 # main.py
-import traceback
+# Convenience entry point for running from the repository root. Requires the package to be
+# installed (`pip install -e .`); otherwise use the `pdfmetajson` command or
+# `python -m pdfmetajson`.
+import sys
 
-from src.cli import CommandLineInterface
-from src.logging_config import configure_logging
-from src.pdf_meta_json import PdfMetaJson
-from src.validators import ValidationError
-
-# --- Global Variables ---
-PACKAGE_NAME = "PdfMetaJson"
-
-
-def main():
-    try:
-        cli = CommandLineInterface(PACKAGE_NAME)
-        args = cli.parse_arguments()
-        configure_logging(verbose=args.verbose, quiet=args.quiet)
-        if not args.quiet:
-            cli.show_banner()
-        pdf_meta_to_json = PdfMetaJson(
-            input_dir=args.path,
-            max_num_files=args.numfiles,
-            record_limit=args.limit
-        )
-        pdf_meta_to_json.process_directory()
-    except ValidationError as ve:
-        print(f"Please correct your info. {ve}")
-    except Exception as e:
-        print(f"Some error ocurried: {e}")
-        print(traceback.format_exc())
-
+from pdfmetajson.__main__ import main
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

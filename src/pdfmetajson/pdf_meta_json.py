@@ -4,8 +4,8 @@ import os
 import traceback
 from pathlib import Path
 
-from src.pdf_meta_extract import PdfMetadataExtractor
-from validators import PathValidator, ValidationError
+from pdfmetajson.pdf_meta_extract import PdfMetadataExtractor
+from pdfmetajson.validators import PathValidator, ValidationError
 
 
 class PdfMetaJson:
@@ -64,13 +64,16 @@ class PdfMetaJson:
         records_pdf_batch = []
         file_index = 1
 
-        for file_path in path.glob("*.pdf"):
+        for file_path in path.glob("*.pdf", case_sensitive=False):
             try:
                 file_processor = PdfMetadataExtractor(
                     file_path, self.max_initial_pages, self.max_final_pages
                 )
-                records_pdf_batch.append(file_processor.process(num_pdfs_readed + 1))
-                num_pdfs_readed += 1
+                record = file_processor.process(num_pdfs_readed + 1)
+                # process() logs and returns None when the file can't be opened
+                if record is not None:
+                    records_pdf_batch.append(record)
+                    num_pdfs_readed += 1
             except Exception as e:
                 self.logger.info(
                     f"The file '{file_path}' could not be processed by the library. "
@@ -79,9 +82,7 @@ class PdfMetaJson:
                 self.logger.error(f"Error with file: '{file_path}': {e}")
                 # self.logger.debug(traceback.format_exc())
                 tb_list = traceback.extract_tb(e.__traceback__)
-                error_file_path, error_line_number, error_function, error_code = (
-                    tb_list[-1]
-                )
+                error_file_path, error_line_number, error_function, error_code = tb_list[-1]
                 self.logger.debug(
                     f"Error in {error_file_path}, line {error_line_number}, "
                     f"in {error_function}: {error_code!r}"
@@ -92,9 +93,7 @@ class PdfMetaJson:
                 break
 
             if 0 < self.max_records_per_file <= len(records_pdf_batch):
-                self.logger.info(
-                    f"Batch completed with {len(records_pdf_batch)} records"
-                )
+                self.logger.info(f"Batch completed with {len(records_pdf_batch)} records")
                 self._write_records(records_pdf_batch, file_index)
                 records_pdf_batch = []
                 file_index += 1
@@ -105,7 +104,7 @@ class PdfMetaJson:
             self.logger.info(
                 "The files in the directory could not be read. Please try other directory or files."
             )
-        else:
+        elif records_pdf_batch:
             self.logger.info(f"Final Batch with {len(records_pdf_batch)} records")
             self._write_records(records_pdf_batch, file_index)
 

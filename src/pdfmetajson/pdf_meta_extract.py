@@ -6,7 +6,7 @@ from datetime import datetime
 
 from pypdf import PdfReader
 
-import pdf_utils
+from pdfmetajson import pdf_utils
 
 
 class PdfMetadataExtractor:

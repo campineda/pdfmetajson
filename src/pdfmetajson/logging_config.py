@@ -68,4 +68,4 @@ def configure_logging(verbose: bool = False, quiet: bool = False):
     # Disable warnings from pypdf library
     logging.getLogger("pypdf._reader").setLevel(logging.ERROR)
     # Disable debug from validator
-    logging.getLogger("validators").setLevel(logging.INFO)
+    logging.getLogger("pdfmetajson.validators").setLevel(logging.INFO)

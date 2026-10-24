@@ -20,19 +20,25 @@ A Python command-line utility to extract metadata and content samples from PDF f
     cd PdfMetaJson
     ```
 
-2.  **Install the package and its dependencies:**
+2.  **Install the package and its dependencies** (Python 3.13 or later):
     The project uses `pyproject.toml` to manage dependencies. Install the package and its requirements using pip:
     ```bash
     pip install .
     ```
+    For development (editable install plus black, isort and flake8):
+    ```bash
+    pip install -e ".[dev]"
+    ```
 
 ## Usage
 
-Run the script from the command line, pointing it to the directory containing your PDF files.
+Run the `pdfmetajson` command, pointing it to the directory containing your PDF files.
 
 ```bash
-python main.py [PATH] [OPTIONS]
+pdfmetajson [PATH] [OPTIONS]
 ```
+
+`python -m pdfmetajson [PATH] [OPTIONS]` works too, and so does `python main.py [PATH] [OPTIONS]` from the repository root once the package is installed.
 
 ### Arguments
 
@@ -47,22 +53,22 @@ python main.py [PATH] [OPTIONS]
 
 **1. Process PDFs in the current directory:**
 ```bash
-python main.py
+pdfmetajson
 ```
 
 **2. Process PDFs in a specific directory:**
 ```bash
-python main.py /path/to/your/pdfs
+pdfmetajson /path/to/your/pdfs
 ```
 
 **3. Process a maximum of 50 files and set a limit of 10 records per JSON file:**
 ```bash
-python main.py /path/to/your/pdfs --numfiles 50 --limit 10
+pdfmetajson /path/to/your/pdfs --numfiles 50 --limit 10
 ```
 
 **4. Run with detailed logging for debugging:**
 ```bash
-python main.py /path/to/your/pdfs --verbose
+pdfmetajson /path/to/your/pdfs --verbose
 ```
 
 ## Output Format
@@ -100,7 +106,7 @@ The script generates one or more JSON files named `out_<directory_name>_XX.json`
 -   pypdf: A pure-python PDF library for reading and manipulating PDF files.
 -   Unidecode: For ASCII transliterations of Unicode text.
 -   colorlog: For adding color to log output.
--   cryptography: Required by `pypdf` for handling encrypted PDF files.
+-   cryptography: Installed through `pypdf[crypto]`; required for handling encrypted PDF files.
 
 ## Changelog
 

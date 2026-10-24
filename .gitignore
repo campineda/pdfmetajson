@@ -21,8 +21,9 @@ __pycache__/
 # poetry.lock
 
 # Python building artifacts
-/PdfMetaJson.egg-info/
-src/PdfMetaJson.egg-info/
+*.egg-info/
+build/
+dist/
 
 # Operating system files
 .DS_Store

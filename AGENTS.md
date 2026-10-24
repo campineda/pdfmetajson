@@ -8,28 +8,33 @@ More specific guidance lives next to the code and is loaded when working there:
 
 ## Commands
 
-Run everything from the repository root (imports use the `src.` prefix).
+Run everything from the repository root. The code is the `pdfmetajson` package under `src/`
+(src layout), so it must be installed (`pip install -e`) before running it or its tests.
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate              # Windows (source .venv/bin/activate on Unix)
-pip install -e ".[dev]"             # project + black, isort, flake8
+pip install -e ".[dev]"             # project + black, isort, flake8 (+ Flake8-pyproject)
 
-python main.py [PATH] [-n NUMFILES] [-l LIMIT] [-v | -q]
+pdfmetajson [PATH] [-n NUMFILES] [-l LIMIT] [-v | -q]   # or: python -m pdfmetajson / python main.py
 python -m unittest discover tests
-black . && isort .
+black . && isort . && flake8
 ```
 
 ## Layout
 
-- `main.py` — entry point: CLI → logging → `PdfMetaJson.process_directory()`
-- `src/cli.py` — `CommandLineInterface`: argparse, version/name from package metadata
-- `src/logging_config.py` — `configure_logging()`, colorlog on the root logger
-- `src/pdf_meta_json.py` — `PdfMetaJson`: directory loop, batching, JSON output
-- `src/pdf_meta_extract.py` — `PdfMetadataExtractor`: metadata + content sample of one PDF (pypdf)
-- `src/pdf_utils.py` — date conversion and text cleaning helpers
-- `src/validators.py` — `ValidationError` and static validator classes
+- `src/pdfmetajson/__main__.py` — `main()`: CLI → logging → `PdfMetaJson.process_directory()`;
+  exposed as the `pdfmetajson` console script (`[project.scripts]`)
+- `main.py` — thin wrapper around `pdfmetajson.__main__.main` for running from the repo root
+- `src/pdfmetajson/__init__.py` — `PACKAGE_NAME` and `__version__` (from package metadata)
+- `src/pdfmetajson/cli.py` — `CommandLineInterface`: argparse, version/name from package metadata
+- `src/pdfmetajson/logging_config.py` — `configure_logging()`, colorlog on the root logger
+- `src/pdfmetajson/pdf_meta_json.py` — `PdfMetaJson`: directory loop, batching, JSON output
+- `src/pdfmetajson/pdf_meta_extract.py` — `PdfMetadataExtractor`: metadata + content sample of one PDF (pypdf)
+- `src/pdfmetajson/pdf_utils.py` — date conversion and text cleaning helpers
+- `src/pdfmetajson/validators.py` — `ValidationError` and static validator classes
 - `tests/` — unittest suite; `tests/data/` sample PDFs
+- `.github/workflows/ci.yml` — lint + tests on every push and pull request
 - `samples-pdf/` — local PDFs for manual testing; git-ignored (size and copyright), never commit it
 
 ## Conventions
@@ -38,7 +43,8 @@ black . && isort .
   (no `setup.py` / `requirements.txt`).
 - Black and isort (profile `black`), line length 100; flake8 ignores E203, W503.
 - Double quotes, f-strings, trailing commas in multi-line structures, PEP 8 names.
-- Imports grouped: standard library, third party, local (`from src.module import Name`).
+- Imports grouped: standard library, third party, local (`from pdfmetajson.module import Name`).
+  Always use absolute `pdfmetajson.` imports; never import modules by their bare name.
 - Use `pathlib.Path` for paths; convert to `str` only when an API requires it.
 - Dependency pins: `>=` for core libraries, `~=` for patch-level compatibility; exact pins only
   when needed for stability.

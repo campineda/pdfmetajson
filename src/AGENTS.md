@@ -1,9 +1,9 @@
-# Application code (`src/`, `main.py`)
+# Application code (`src/pdfmetajson/`, `main.py`)
 
 ## Logging
 
 - Each module or class uses `logging.getLogger(__name__)`; never configure handlers outside
-  `configure_logging()`, which is called once from `main.py`.
+  `configure_logging()`, which is called once from `pdfmetajson.__main__.main()`.
 - Levels: DEBUG for diagnostics and parameter values, INFO for flow and per-file progress,
   WARNING for recoverable data issues, ERROR for failures that don't stop the run, CRITICAL for
   fatal errors.
@@ -15,7 +15,7 @@
 - One bad PDF must never stop the run: catch per file, log ERROR with the file name, log the last
   traceback frame (`traceback.extract_tb`) at DEBUG, and continue.
 - Repeated per-page errors are aggregated with `collections.Counter` and summarized once.
-- Input problems raise `ValidationError` (from `src.validators`); `main.py` turns it into a
+- Input problems raise `ValidationError` (from `pdfmetajson.validators`); `__main__.main()` turns it into a
   user-friendly message.
 - Handle empty directories and unreadable files explicitly; check permissions with `os.access()`.
 - Use context managers for every file handle.
@@ -31,8 +31,8 @@
 - Size limits are class constants (e.g. `MAX_CHARS_PER_PAGE`); process files in batches to bound
   memory.
 
-## CLI (`src/cli.py`)
+## CLI (`src/pdfmetajson/cli.py`)
 
-- App name, version, and description come from `importlib.metadata` (fallback `"unknown"`).
+- App name, version, and description come from `importlib.metadata` (fallbacks: the package name and `"unknown"`).
 - Validate arguments at the CLI level with `parser.error()` for immediate feedback.
 - `--verbose` and `--quiet` are mutually exclusive.

@@ -9,9 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `pdfmetajson` console command and `python -m pdfmetajson`; `python main.py` still works from
+  the repository root once the package is installed.
+- CI workflow (GitHub Actions) running black, isort, flake8 and the tests on Linux and Windows.
 - Shared agent instructions for GitHub Copilot and Claude Code (`AGENTS.md`, `src/AGENTS.md`,
   `tests/AGENTS.md`).
 - This changelog.
+
+### Changed
+
+- The code is now the `pdfmetajson` package (`src/pdfmetajson/`). It no longer installs generic
+  top-level modules such as `cli` or `validators`, which could clash with other packages.
+- `cryptography` is pulled in through `pypdf[crypto]` instead of being a direct dependency.
+- The application name is shown as `PdfMetaJson` (was `Pdfmetajson`), and error messages go to
+  stderr with a non-zero exit code.
+
+### Fixed
+
+- `--version` could show a stale version (`0.1.0`) when run from the repository root.
+- Validation errors raised while processing were reported as unexpected errors with a traceback
+  instead of a friendly message.
+- Files with an uppercase `.PDF` extension were skipped on case-sensitive file systems.
+- A PDF that could not be opened was written to the JSON output as `null`.
+- An empty JSON file was written when the number of PDFs was an exact multiple of `--limit`.
 
 ## [0.4.1] - 2025-08-23
 
