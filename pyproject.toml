@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PdfMetaJson"
-version = "0.5.0"
+version = "0.6.0"
 description = "Python command utility to scan PDF files from a path and extract metadata and some content from them into a Json file."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -21,7 +21,6 @@ classifiers = [
     "Environment :: Console",
 ]
 dependencies = [
-    "Unidecode~=1.4.0",
     # The crypto extra pulls in cryptography, needed to read AES-encrypted PDFs
     "pypdf[crypto]>=6.0.0",
     "colorlog>=6.9.0",
@@ -35,6 +34,7 @@ dev = [
     # Lets flake8 read its settings from [tool.flake8] below
     "Flake8-pyproject>=1.2",
     "pre-commit>=4.0",
+    "pytest>=8.0",
 ]
 
 [project.scripts]
@@ -64,3 +64,6 @@ extend-ignore = [
     "W503",
 ]
 exclude = [".git", ".venv", "build", "dist", "__pycache__"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

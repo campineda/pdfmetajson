@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from typing import Optional
 
+from pdfmetajson.pdf_utils import long_path
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,19 +37,21 @@ class PathValidator:
             return None
 
         try:
-            path_obj = Path(path).resolve()
+            path_obj = Path(os.path.abspath(path))
+            # Checked through long_path() so directories longer than MAX_PATH work on Windows
+            os_path = Path(long_path(path_obj))
 
-            if not path_obj.exists():
+            if not os_path.exists():
                 raise ValidationError(f"Input directory does not exist: {path}")
 
-            if not path_obj.is_dir():
+            if not os_path.is_dir():
                 raise ValidationError(f"Path is not a directory: {path}")
 
-            if not os.access(path_obj, os.R_OK):
+            if not os.access(os_path, os.R_OK):
                 raise ValidationError(f"Directory is not readable: {path}")
 
             # Check if directory is empty
-            if not any(path_obj.iterdir()):
+            if not any(os_path.iterdir()):
                 logger.warning(f"Input directory is empty: {path}")
 
             logger.debug(f"Input directory validated: {path_obj}")
@@ -74,15 +78,16 @@ class PathValidator:
             return None
 
         try:
-            output_path = Path(path).resolve()
+            output_path = Path(os.path.abspath(path))
+            os_path = Path(long_path(output_path))
 
-            if not output_path.exists():
+            if not os_path.exists():
                 raise ValidationError(f"Output directory does not exist: {path}")
 
-            if not output_path.is_dir():
+            if not os_path.is_dir():
                 raise ValidationError(f"Path is not a directory: {path}")
 
-            if not os.access(output_path, os.W_OK):
+            if not os.access(os_path, os.W_OK):
                 raise ValidationError(f"Output directory is not writable: {path}")
 
             logger.debug(f"Output directory validated: {output_path}")

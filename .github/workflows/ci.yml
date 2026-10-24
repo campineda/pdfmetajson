@@ -26,4 +26,4 @@ jobs:
           isort --check-only .
           flake8
       - name: Test
-        run: python -m unittest discover tests -v
+        run: python -m pytest -v

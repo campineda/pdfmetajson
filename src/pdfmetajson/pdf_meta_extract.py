@@ -3,69 +3,130 @@ import os
 import traceback
 from collections import Counter
 from datetime import datetime
+from pathlib import Path
 
-from pypdf import PdfReader
+from pypdf import PasswordType, PdfReader
+from pypdf.errors import FileNotDecryptedError, PdfReadError
 
 from pdfmetajson import pdf_utils
 
 
 class PdfMetadataExtractor:
+    DEFAULT_INITIAL_PAGES = 2
+    DEFAULT_FINAL_PAGES = 1
+    # 0 means no limit: the whole text of each sampled page
     MAX_CHARS_PER_PAGE = 700
     MIN_CHARS_PER_PAGE = 5
     MAX_CONTENT_EXTRACTION_ATTEMPTS = 10
 
-    def __init__(self, file_path, max_initial_pages=2, max_final_pages=1):
+    # Codes of the "error" field: stable values the consumer can base decisions on
+    ERROR_NOT_FOUND = "not_found"
+    ERROR_PERMISSION_DENIED = "permission_denied"
+    ERROR_ENCRYPTED = "encrypted"
+    ERROR_CORRUPT = "corrupt"
+    ERROR_OS = "os_error"
+    ERROR_UNEXPECTED = "unexpected"
+
+    # Codes of the "warnings" field: the record is valid but its content sample is limited
+    WARNING_NO_TEXT = "no_text"
+    WARNING_PAGE_ERRORS = "page_errors"
+
+    def __init__(
+        self,
+        file_path,
+        max_initial_pages=DEFAULT_INITIAL_PAGES,
+        max_final_pages=DEFAULT_FINAL_PAGES,
+        max_chars_per_page=MAX_CHARS_PER_PAGE,
+    ):
         self.file_path = file_path
         self.max_initial_pages = max_initial_pages
         self.max_final_pages = max_final_pages
-        self.file_name = ""
-        self.file_date = ""
-        self.num_pages = ""
+        self.max_chars_per_page = max_chars_per_page
+        self.file_name = Path(file_path).name
+        self.file_date = None
+        self.num_pages = None
         self.metadata = {}
-        self.content = ""
+        self.content = {}
+        self.warnings = []
         self.logger = logging.getLogger(__name__)
 
     def process(self, file_num=0):
-        try:
-            with open(self.file_path, "rb") as f:
-                self.file_name = os.path.basename(self.file_path)
-                file_num_text = f" #{file_num}" if file_num > 0 else ""
-                self.logger.info(f"Processing file{file_num_text}: '{self.file_path}'...")
-                reader = PdfReader(f)
-                self.metadata = self._extract_metadata(reader) or None
-                self._extract_content(reader)
+        """
+        Extracts the record of the PDF. It never raises: a file that can't be read still gets
+        a record, with an "error" field that explains why.
 
-            self.file_date = datetime.fromtimestamp(os.path.getmtime(self.file_path)).strftime(
+        Args:
+            file_num: Position of the file in the run; 0 leaves "file_num" out of the record.
+
+        Returns:
+            dict: The record (file_num, file_name_original, file_date, num_pages, metadata,
+            content_sample, plus "warnings" and "error" when they apply).
+        """
+        file_num_text = f" #{file_num}" if file_num > 0 else ""
+        self.logger.info(f"Processing file{file_num_text}: '{self.file_path}'...")
+        error = None
+        try:
+            os_path = pdf_utils.long_path(self.file_path)
+            self.file_date = datetime.fromtimestamp(os.path.getmtime(os_path)).strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
-            self.num_pages = len(reader.pages)
-            pdf_info = {}
-            if file_num > 0:
-                pdf_info["file_num"] = file_num
-            pdf_info.update(
-                {
-                    "file_name_original": self.file_name,
-                    "file_date": self.file_date,
-                    "num_pages": self.num_pages,
-                }
+            with open(os_path, "rb") as f:
+                reader = PdfReader(f)
+                # pypdf opens files encrypted with an empty password; others need the real one
+                if reader.is_encrypted and reader.decrypt("") == PasswordType.NOT_DECRYPTED:
+                    raise FileNotDecryptedError("File has not been decrypted")
+                self.metadata = self._extract_metadata(reader)
+                self.num_pages = len(reader.pages)
+                self._extract_content(reader)
+        except Exception as e:
+            error = self._build_error(e)
+
+        pdf_info = {}
+        if file_num > 0:
+            pdf_info["file_num"] = file_num
+        pdf_info.update(
+            {
+                "file_name_original": self.file_name,
+                "file_date": self.file_date,
+                "num_pages": self.num_pages,
+                "metadata": self.metadata,
+                "content_sample": self.content,
+            }
+        )
+        if self.warnings:
+            pdf_info["warnings"] = self.warnings
+        if error is not None:
+            pdf_info["error"] = error
+        return pdf_info
+
+    def _build_error(self, exception):
+        """Classifies an exception into the record's "error" field and logs it."""
+        if isinstance(exception, FileNotFoundError):
+            code, message = self.ERROR_NOT_FOUND, "The file does not exist"
+        elif isinstance(exception, PermissionError):
+            code, message = (
+                self.ERROR_PERMISSION_DENIED,
+                "The file can't be read: permission denied or locked by another process",
             )
-            if self.metadata is not None:
-                pdf_info["metadata"] = self.metadata
-            if self.content is not None:
-                pdf_info["content_sample"] = self.content
-            return pdf_info
-        except PermissionError:
-            self.logger.error(f"You do not have permission to read the file {self.file_name}")
-            return None
-        except FileNotFoundError:
-            self.logger.error(f"File {self.file_name} not found")
-            return None
-        except IsADirectoryError:
-            self.logger.error("The specified path is a directory, not a file.")
-            return None
-        except IOError as e:
-            self.logger.error(f"An I/O error occurred: : {e}")
-            return None
+        elif isinstance(exception, FileNotDecryptedError):
+            code, message = self.ERROR_ENCRYPTED, "The PDF requires a password to be read"
+        elif isinstance(exception, PdfReadError):
+            code, message = self.ERROR_CORRUPT, "The PDF structure is damaged or incomplete"
+        elif isinstance(exception, OSError):
+            code, message = self.ERROR_OS, "An I/O error occurred while reading the file"
+        else:
+            code, message = self.ERROR_UNEXPECTED, "Unexpected error while reading the PDF"
+        detail = f"{type(exception).__name__}: {exception}"
+
+        self.logger.error(f"Error with file '{self.file_name}': [{code}] {message} ({detail})")
+        tb_list = traceback.extract_tb(exception.__traceback__)
+        if tb_list:
+            error_file_path, error_line_number, error_function, error_code = tb_list[-1]
+            self.logger.debug(
+                f"Error in {error_file_path}, line {error_line_number}, "
+                f"in {error_function}: {error_code!r}"
+            )
+        return {"code": code, "message": message, "detail": detail}
 
     def _extract_metadata(self, reader):
         metadata = {}
@@ -135,6 +196,7 @@ class PdfMetadataExtractor:
 
         # Log errors if any
         if pages_with_errors:
+            self.warnings.append(self.WARNING_PAGE_ERRORS)
             str_lis_pages = ", ".join(str(page) for page in pages_with_errors)
             error_summary = ", ".join(f"'{msg}' ({count})" for msg, count in error_counter.items())
             self.logger.debug(
@@ -149,7 +211,8 @@ class PdfMetadataExtractor:
                     f"in function '{error_detail['function']}'"
                 )
 
-        if not pdf_pages:
+        if not pdf_pages and self.max_initial_pages + self.max_final_pages > 0:
+            self.warnings.append(self.WARNING_NO_TEXT)
             self.logger.warning(
                 "Was imposible to get contents for the file. "
                 "Maybe it's a scanned book? We don't support image conversion."
@@ -181,6 +244,7 @@ class PdfMetadataExtractor:
         tries = 0
         page_num = start_page
         direction = 1 if is_forward else -1
+        max_chars = self.max_chars_per_page or None
 
         while (
             pages_read < max_pages
@@ -191,15 +255,10 @@ class PdfMetadataExtractor:
             )
         ):
 
-            page = reader.pages[page_num - 1]
-
             try:
+                # Inside the try: a malformed page can fail on lookup, not only on extraction
+                page = reader.pages[page_num - 1]
                 page_text = pdf_utils.clean_text(page.extract_text())
-                # Extract from beginning or end based on direction
-                if is_forward:
-                    page_text = page_text[: self.MAX_CHARS_PER_PAGE]
-                else:
-                    page_text = page_text[-self.MAX_CHARS_PER_PAGE :]
             except Exception as e:
                 pages_with_errors.append(page_num)
                 error_counter[str(e)] += 1
@@ -220,7 +279,11 @@ class PdfMetadataExtractor:
 
                 page_text = ""
 
+            # The minimum is checked on the whole page, before the character limit is applied
             if len(page_text) > self.MIN_CHARS_PER_PAGE:
+                # Keep the beginning of initial pages and the end of final pages
+                if max_chars is not None:
+                    page_text = page_text[:max_chars] if is_forward else page_text[-max_chars:]
                 pages[f"page_{page_num}"] = page_text
                 pages_read += 1
             else:

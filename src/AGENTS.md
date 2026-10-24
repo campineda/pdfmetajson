@@ -12,9 +12,15 @@
 
 ## Errors and robustness
 
-- One bad PDF must never stop the run: catch per file, log ERROR with the file name, log the last
-  traceback frame (`traceback.extract_tb`) at DEBUG, and continue.
+- One bad PDF must never stop the run or vanish from the output: `PdfMetadataExtractor.process()`
+  never raises; it logs ERROR with the file name, logs the last traceback frame
+  (`traceback.extract_tb`) at DEBUG, and returns the record with an `error` field
+  (`ERROR_*` codes). Limited samples get `WARNING_*` codes in `warnings`.
+- Open, stat and list files through `pdf_utils.long_path()` so paths over 260 characters work on
+  Windows; keep the normal path for logs and records.
 - Repeated per-page errors are aggregated with `collections.Counter` and summarized once.
+- `PdfMetaJson.process_directory()` returns a `ProcessingSummary`; `main()` maps it to the exit
+  code (`EXIT_*` constants).
 - Input problems raise `ValidationError` (from `pdfmetajson.validators`); `__main__.main()` turns it into a
   user-friendly message.
 - Handle empty directories and unreadable files explicitly; check permissions with `os.access()`.

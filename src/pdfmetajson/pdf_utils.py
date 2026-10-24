@@ -2,9 +2,10 @@
 
 import datetime
 import logging
+import os
 import re
-
-from unidecode import unidecode
+import sys
+import unicodedata
 
 logger = logging.getLogger(__name__)
 
@@ -87,9 +88,37 @@ def convert_date(date_string, debug=False):
     )
 
 
+WINDOWS_LONG_PATH_PREFIX = "\\\\?\\"
+WINDOWS_LONG_UNC_PREFIX = "\\\\?\\UNC\\"
+
+
+def long_path(path):
+    r"""
+    Returns the path as a string that the OS can open even when it is longer than MAX_PATH.
+
+    On Windows, paths of 260 characters or more fail unless long paths are enabled system-wide,
+    so the absolute path gets the extended-length prefix (``\\?\``, or ``\\?\UNC\`` for
+    network shares). On other systems the path is returned unchanged.
+
+    Args:
+        path: File or directory path (str or Path).
+
+    Returns:
+        str: Path ready to pass to ``open()``, ``os.stat()``, etc.
+    """
+    path = str(path)
+    if sys.platform != "win32" or path.startswith(WINDOWS_LONG_PATH_PREFIX):
+        return path
+    # The prefix turns off path normalization, so the path must be absolute and use backslashes
+    path = os.path.abspath(path)
+    if path.startswith("\\\\"):
+        return WINDOWS_LONG_UNC_PREFIX + path[2:]
+    return WINDOWS_LONG_PATH_PREFIX + path
+
+
 def sanityze(text):
-    # Replace accented characters with normal versions in only the leading letters of A-Z
-    text = unidecode(text)
+    # Keep the Unicode text as pypdf returns it (accents, eñes, dashes); only unify its form
+    text = unicodedata.normalize("NFC", text)
     # Replace special characters
     text = sanitize_special_characters(text)
     # Removing leading and trailing blanks
