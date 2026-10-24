@@ -1,0 +1,35 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    // Linting with flake8
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    // Formatting with black
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "always"
+        }
+    },
+    // Auto-format on save
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always"
+    },
+    // Flake8 settings
+    "flake8.args": [
+        "--max-line-length=100",
+        "--extend-ignore=E203,W503"
+    ],
+    // isort settings
+    "isort.args": [
+        "--profile=black",
+        "--line-length=100"
+    ],
+    "python-envs.pythonProjects": [],
+    // AI agents: AGENTS.md is the shared instructions file (Copilot + Claude Code).
+    // CLAUDE.md only imports AGENTS.md, so Copilot skips it to avoid duplicates.
+    "chat.useAgentsMdFile": true,
+    "chat.useClaudeMdFile": false
+}

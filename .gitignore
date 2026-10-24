@@ -10,7 +10,8 @@ __pycache__/
 
 # IDE specific files (PyCharm, VSCode)
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # Local configuration files (if any)
 # .env
