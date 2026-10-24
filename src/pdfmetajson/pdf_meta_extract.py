@@ -255,13 +255,10 @@ class PdfMetadataExtractor:
             )
         ):
 
-            page = reader.pages[page_num - 1]
-
             try:
+                # Inside the try: a malformed page can fail on lookup, not only on extraction
+                page = reader.pages[page_num - 1]
                 page_text = pdf_utils.clean_text(page.extract_text())
-                # Extract from beginning or end based on direction
-                if max_chars is not None:
-                    page_text = page_text[:max_chars] if is_forward else page_text[-max_chars:]
             except Exception as e:
                 pages_with_errors.append(page_num)
                 error_counter[str(e)] += 1
@@ -282,7 +279,11 @@ class PdfMetadataExtractor:
 
                 page_text = ""
 
+            # The minimum is checked on the whole page, before the character limit is applied
             if len(page_text) > self.MIN_CHARS_PER_PAGE:
+                # Keep the beginning of initial pages and the end of final pages
+                if max_chars is not None:
+                    page_text = page_text[:max_chars] if is_forward else page_text[-max_chars:]
                 pages[f"page_{page_num}"] = page_text
                 pages_read += 1
             else:

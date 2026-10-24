@@ -39,8 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- PDFs with paths longer than 260 characters on Windows were reported as `File  not found`
-  (without the file name) and left out of the output. Directories with long paths work too.
+- PDFs with paths longer than 260 characters on Windows were reported as "File not found" with an
+  empty file name and left out of the output. Directories with long paths work too.
+- A page that failed to load made the whole PDF fail; it is now skipped and reported in
+  `warnings` as `page_errors`.
 - Encrypted, corrupt or otherwise unreadable PDFs were left out of the output without a trace in
   the JSON; they now get a record with `error`.
 - No JSON file was written when none of the PDFs could be read.

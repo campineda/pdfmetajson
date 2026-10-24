@@ -4,8 +4,11 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from unittest import mock
 
 from pdf_factory import long_text, make_corrupt_pdf, make_long_dir, make_pdf
+from pypdf import PdfReader
+from pypdf.errors import PdfReadError
 
 from pdfmetajson.pdf_meta_extract import PdfMetadataExtractor
 from pdfmetajson.pdf_utils import long_path
@@ -152,6 +155,44 @@ class ExtractorRecordTestCase(unittest.TestCase):
         sample = self.process(pdf, max_chars_per_page=0)["content_sample"]
 
         self.assertEqual(sample["page_1"], text)
+
+    def test_max_chars_below_the_minimum_page_text_still_samples_pages(self):
+        pdf = make_pdf(self.tmp_dir / "page.pdf", ["Some text on the page"], {"/Title": "Page"})
+
+        record = self.process(pdf, max_chars_per_page=3)
+
+        self.assertEqual(record["content_sample"], {"page_1": "Som"})
+        self.assertNotIn("warnings", record)
+
+    def test_page_that_fails_to_load_is_skipped_with_page_errors_warning(self):
+        pages = [f"Text of page {n}" for n in range(1, 4)]
+        pdf = make_pdf(self.tmp_dir / "book.pdf", pages, {"/Title": "Book"})
+
+        class BrokenPages(list):
+            def __getitem__(self, index):
+                if index == 0:
+                    raise PdfReadError("Invalid page object")
+                return super().__getitem__(index)
+
+        def reader_with_broken_first_page(stream):
+            reader = PdfReader(stream)
+            return mock.Mock(
+                wraps=reader,
+                is_encrypted=False,
+                metadata=reader.metadata,
+                pages=BrokenPages(reader.pages),
+            )
+
+        with mock.patch(
+            "pdfmetajson.pdf_meta_extract.PdfReader", side_effect=reader_with_broken_first_page
+        ):
+            record = self.process(pdf)
+
+        self.assertNotIn("error", record)
+        self.assertEqual(record["warnings"], [PdfMetadataExtractor.WARNING_PAGE_ERRORS])
+        self.assertEqual(
+            record["content_sample"], {"page_2": "Text of page 2", "page_3": "Text of page 3"}
+        )
 
     def test_file_with_path_longer_than_260_chars_is_read(self):
         long_dir = make_long_dir(self.tmp_dir, 280)

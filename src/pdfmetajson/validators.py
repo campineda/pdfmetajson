@@ -37,7 +37,7 @@ class PathValidator:
             return None
 
         try:
-            path_obj = Path(path).resolve()
+            path_obj = Path(os.path.abspath(path))
             # Checked through long_path() so directories longer than MAX_PATH work on Windows
             os_path = Path(long_path(path_obj))
 
@@ -78,7 +78,7 @@ class PathValidator:
             return None
 
         try:
-            output_path = Path(path).resolve()
+            output_path = Path(os.path.abspath(path))
             os_path = Path(long_path(output_path))
 
             if not os_path.exists():
