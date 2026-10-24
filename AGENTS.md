@@ -17,12 +17,15 @@ python -m venv .venv
 pip install -e ".[dev]"             # project + black, isort, flake8 (+ Flake8-pyproject), pre-commit
 pre-commit install                  # once: hooks run black, isort, flake8 on every commit
 
-pdfmetajson [PATH] [-n NUMFILES] [-l LIMIT] [-v | -q]   # or: python -m pdfmetajson / python main.py
-python -m unittest discover tests
+pdfmetajson [PATH] [-n NUMFILES] [-l LIMIT] [-o OUTPUT_DIR] [--initial-pages N] [--final-pages N]
+            [--max-chars N] [-v | -q]                 # or: python -m pdfmetajson / python main.py
+python -m pytest                    # or: python -m unittest discover tests
 pre-commit run --all-files          # or: black . && isort . && flake8
 ```
 
-`-n 0` and `-l 0` mean "no limit"; defaults are `PdfMetaJson.DEFAULT_*` constants, shared by the CLI.
+`-n 0`, `-l 0` and `--max-chars 0` mean "no limit" (`--initial-pages 0` / `--final-pages 0` sample
+no pages); defaults are `PdfMetaJson.DEFAULT_*` constants, shared by the CLI. Exit codes: 0 ok,
+1 validation or unexpected error, 2 invalid arguments (argparse), 3 some records have `error`.
 
 ## Layout
 
@@ -34,9 +37,10 @@ pre-commit run --all-files          # or: black . && isort . && flake8
 - `src/pdfmetajson/logging_config.py` — `configure_logging()`, colorlog on the root logger
 - `src/pdfmetajson/pdf_meta_json.py` — `PdfMetaJson`: directory loop, batching, JSON output
 - `src/pdfmetajson/pdf_meta_extract.py` — `PdfMetadataExtractor`: metadata + content sample of one PDF (pypdf)
-- `src/pdfmetajson/pdf_utils.py` — date conversion and text cleaning helpers
+- `src/pdfmetajson/pdf_utils.py` — date conversion, text cleaning and `long_path()` helpers
 - `src/pdfmetajson/validators.py` — `ValidationError` and static validator classes
-- `tests/` — unittest suite; `tests/data/` sample PDFs
+- `tests/` — unittest suite (run with pytest or unittest); `tests/pdf_factory.py` builds test PDFs;
+  `tests/data/` sample PDFs
 - `.github/workflows/ci.yml` — lint + tests (Linux, Windows; Python 3.13, 3.14) on every push and PR
 - `.github/dependabot.yml` — monthly grouped update PRs for pip dependencies and GitHub Actions
 - `.pre-commit-config.yaml` — commit hooks; keep its black/isort/flake8 revs close to the dev
@@ -54,7 +58,10 @@ pre-commit run --all-files          # or: black . && isort . && flake8
 - Use `pathlib.Path` for paths; convert to `str` only when an API requires it.
 - Dependency pins: `>=` for core libraries, `~=` for patch-level compatibility; exact pins only
   when needed for stability.
-- When the CLI or output format changes, update `README.md` (features, usage examples, sample JSON).
+- When the CLI or output format changes, update `README.md` (features, usage examples, sample JSON,
+  record fields, error/warning codes, exit codes).
+- The record schema is a contract with consumers (e.g. ebooks-organizer): keep every key present,
+  don't rename keys or `error`/`warnings` codes without a changelog entry.
 
 ## Versioning and changelog
 

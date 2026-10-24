@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 from pdfmetajson.pdf_meta_json import PdfMetaJson
+from pdfmetajson.pdf_utils import long_path
 
 
 class CommandLineInterface:
@@ -73,6 +74,33 @@ class CommandLineInterface:
             help="max records per JSON file; 0 writes a single file (default: %(default)s)",
         )
 
+        # Output directory
+        parser.add_argument(
+            "-o",
+            "--output-dir",
+            default=None,
+            help="directory for the JSON files, created if missing (default: the input path)",
+        )
+        # Content sample
+        parser.add_argument(
+            "--initial-pages",
+            type=int,
+            default=PdfMetaJson.DEFAULT_INITIAL_PAGES,
+            help="pages with text sampled from the start; 0 samples none (default: %(default)s)",
+        )
+        parser.add_argument(
+            "--final-pages",
+            type=int,
+            default=PdfMetaJson.DEFAULT_FINAL_PAGES,
+            help="pages with text sampled from the end; 0 samples none (default: %(default)s)",
+        )
+        parser.add_argument(
+            "--max-chars",
+            type=int,
+            default=PdfMetaJson.DEFAULT_MAX_CHARS,
+            help="max characters per sampled page; 0 keeps the whole page (default: %(default)s)",
+        )
+
         # Verbose or Quite
         verbosity = parser.add_mutually_exclusive_group()
         verbosity.add_argument(
@@ -107,7 +135,7 @@ class CommandLineInterface:
         """
         # Validate path argument
         if args.path is not None:
-            path = Path(args.path)
+            path = Path(long_path(args.path))
             if not path.exists():
                 self.parser.error(f"Input path does not exist: {args.path}")
             if not path.is_dir():
@@ -122,6 +150,15 @@ class CommandLineInterface:
         # Validate limit argument (0 = single output file)
         if args.limit < 0:
             self.parser.error("limit must be 0 (single file) or a positive integer")
+
+        # Validate content sample arguments (0 = none for pages, no limit for characters)
+        for name in ("initial_pages", "final_pages", "max_chars"):
+            if getattr(args, name) < 0:
+                self.parser.error(f"--{name.replace('_', '-')} must be 0 or a positive integer")
+
+        # Validate output directory argument (it is created later if it doesn't exist)
+        if args.output_dir is not None and Path(long_path(args.output_dir)).is_file():
+            self.parser.error(f"Output path is a file, not a directory: {args.output_dir}")
 
     def show_banner(self):
         print(f"\n{self.app_name} v{self.app_version}")

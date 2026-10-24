@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `--initial-pages`, `--final-pages` and `--max-chars` set the size of the content sample
+  (defaults: 2, 1 and 700, as before; `--max-chars 0` keeps the whole page).
+- `-o/--output-dir` writes the JSON files to another directory, created if missing (default:
+  the input directory).
+- Records of files that can't be read have an `error` field with `code`, `message` and
+  `detail`. Codes: `not_found`, `permission_denied`, `encrypted`, `corrupt`, `os_error`,
+  `unexpected`.
+- Records whose sample is limited have a `warnings` list: `no_text` (probably a scanned PDF),
+  `page_errors` (some pages failed to extract).
+- Exit code `3` when the run finishes but some records have an `error` field, and a summary of
+  the errors at the end of the log.
+- Exit codes and record fields are documented in the README.
+- pytest in the `dev` dependencies; CI runs the tests with pytest.
+
+### Changed
+
+- The content sample keeps the Unicode text as pypdf returns it (accents, `ñ`, dashes, typographic
+  quotes), normalized to NFC, instead of converting it to ASCII.
+- `metadata` and `content_sample` are always present in a record (`{}` when empty).
+- `file_num` counts every PDF found, including those that can't be read, so it no longer
+  repeats after an error.
+
+### Removed
+
+- The `Unidecode` dependency.
+
+### Fixed
+
+- PDFs with paths longer than 260 characters on Windows were reported as `File  not found`
+  (without the file name) and left out of the output. Directories with long paths work too.
+- Encrypted, corrupt or otherwise unreadable PDFs were left out of the output without a trace in
+  the JSON; they now get a record with `error`.
+- No JSON file was written when none of the PDFs could be read.
+
 ## [0.5.0] - 2026-10-24
 
 ### Added
