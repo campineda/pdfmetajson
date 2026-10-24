@@ -14,12 +14,15 @@ Run everything from the repository root. The code is the `pdfmetajson` package u
 ```bash
 python -m venv .venv
 .venv\Scripts\activate              # Windows (source .venv/bin/activate on Unix)
-pip install -e ".[dev]"             # project + black, isort, flake8 (+ Flake8-pyproject)
+pip install -e ".[dev]"             # project + black, isort, flake8 (+ Flake8-pyproject), pre-commit
+pre-commit install                  # once: hooks run black, isort, flake8 on every commit
 
 pdfmetajson [PATH] [-n NUMFILES] [-l LIMIT] [-v | -q]   # or: python -m pdfmetajson / python main.py
 python -m unittest discover tests
-black . && isort . && flake8
+pre-commit run --all-files          # or: black . && isort . && flake8
 ```
+
+`-n 0` and `-l 0` mean "no limit"; defaults are `PdfMetaJson.DEFAULT_*` constants, shared by the CLI.
 
 ## Layout
 
@@ -34,7 +37,10 @@ black . && isort . && flake8
 - `src/pdfmetajson/pdf_utils.py` — date conversion and text cleaning helpers
 - `src/pdfmetajson/validators.py` — `ValidationError` and static validator classes
 - `tests/` — unittest suite; `tests/data/` sample PDFs
-- `.github/workflows/ci.yml` — lint + tests on every push and pull request
+- `.github/workflows/ci.yml` — lint + tests (Linux, Windows; Python 3.13, 3.14) on every push and PR
+- `.github/dependabot.yml` — monthly grouped update PRs for pip dependencies and GitHub Actions
+- `.pre-commit-config.yaml` — commit hooks; keep its black/isort/flake8 revs close to the dev
+  versions installed by pip
 - `samples-pdf/` — local PDFs for manual testing; git-ignored (size and copyright), never commit it
 
 ## Conventions

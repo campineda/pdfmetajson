@@ -11,7 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `pdfmetajson` console command and `python -m pdfmetajson`; `python main.py` still works from
   the repository root once the package is installed.
-- CI workflow (GitHub Actions) running black, isort, flake8 and the tests on Linux and Windows.
+- CI workflow (GitHub Actions) running black, isort, flake8 and the tests on Linux and Windows
+  with Python 3.13 and 3.14.
+- pre-commit hooks (black, isort, flake8 and basic file checks) and Dependabot updates.
+- Tests for the CLI arguments and the text and date utilities.
 - Shared agent instructions for GitHub Copilot and Claude Code (`AGENTS.md`, `src/AGENTS.md`,
   `tests/AGENTS.md`).
 - This changelog.
@@ -23,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `cryptography` is pulled in through `pypdf[crypto]` instead of being a direct dependency.
 - The application name is shown as `PdfMetaJson` (was `Pdfmetajson`), and error messages go to
   stderr with a non-zero exit code.
+- `-n/--numfiles` and `-l/--limit` now require a value; `0` means no limit (documented in
+  `--help`).
+- Removed the unused `ProcessingValidator` and `OutputValidator` classes.
 
 ### Fixed
 
@@ -32,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Files with an uppercase `.PDF` extension were skipped on case-sensitive file systems.
 - A PDF that could not be opened was written to the JSON output as `null`.
 - An empty JSON file was written when the number of PDFs was an exact multiple of `--limit`.
+- Double quotes and backslashes in the content sample were escaped twice, so the JSON contained
+  `\"` instead of `"`.
+- `-n` or `-l` without a value crashed with a `TypeError`.
 
 ## [0.4.1] - 2025-08-23
 

@@ -99,7 +99,7 @@ def sanityze(text):
 
 
 def sanitize_special_characters(text):
-    text = text.replace("\\", "\\\\").replace('"', '\\"')
+    # Quotes and backslashes are left as-is: json.dumps escapes them when writing the output
     text = text.replace("/uni00A0", " ")
     text = text.replace("/G84/G84", "- ")
     return text

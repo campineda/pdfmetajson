@@ -18,7 +18,7 @@ class PdfMetaJsonTestCase(unittest.TestCase):
         shutil.rmtree(self.tmp_dir, ignore_errors=True)
 
     def test_missing_directory_raises_validation_error(self):
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError), self.assertLogs(level="ERROR"):
             PdfMetaJson(input_dir=str(self.tmp_dir / "missing"))
 
     def test_process_directory_writes_batches(self):

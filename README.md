@@ -25,9 +25,10 @@ A Python command-line utility to extract metadata and content samples from PDF f
     ```bash
     pip install .
     ```
-    For development (editable install plus black, isort and flake8):
+    For development (editable install plus black, isort, flake8 and pre-commit):
     ```bash
     pip install -e ".[dev]"
+    pre-commit install    # run the formatters and linters on every commit
     ```
 
 ## Usage
@@ -43,8 +44,8 @@ pdfmetajson [PATH] [OPTIONS]
 ### Arguments
 
 -   `path`: (Optional) The input directory to scan for `.pdf` files. Defaults to the current directory (`.`).
--   `-n, --numfiles`: (Optional) The maximum number of PDF files to process. By default, it processes all files found.
--   `-l, --limit`: (Optional) The maximum number of records (PDFs) to include in a single output JSON file before creating a new one. Defaults to `15`.
+-   `-n, --numfiles`: (Optional) The maximum number of PDF files to process. Defaults to `0`, which processes all files found.
+-   `-l, --limit`: (Optional) The maximum number of records (PDFs) to include in a single output JSON file before creating a new one. Defaults to `15`; `0` writes all records to a single file.
 -   `-v, --verbose`: (Optional) Enables verbose mode, showing detailed information about the process, including DEBUG logs.
 -   `-q, --quiet`: (Optional) Enables quiet mode, which suppresses all informational output and only displays errors.
 -   `--version`: Displays the application name and version.

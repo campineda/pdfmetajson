@@ -9,29 +9,23 @@ from pdfmetajson.validators import PathValidator, ValidationError
 
 
 class PdfMetaJson:
+    # 0 means no limit: process every PDF / write a single output file
+    DEFAULT_MAX_NUM_FILES = 0
+    DEFAULT_RECORD_LIMIT = 15
 
     def __init__(
         self,
         input_dir,
-        max_num_files=0,
-        record_limit=5,
+        max_num_files=DEFAULT_MAX_NUM_FILES,
+        record_limit=DEFAULT_RECORD_LIMIT,
         max_initial_pages=2,
         max_final_pages=1,
     ):
         self.logger = logging.getLogger(__name__)
         self.logger.debug(
-            __name__
-            + "(input_dir='"
-            + input_dir
-            + "',max_num_files='"
-            + str(max_num_files)
-            + "',record_limit='"
-            + str(record_limit)
-            + "',max_initial_pages='"
-            + str(max_initial_pages)
-            + "',max_final_pages='"
-            + str(max_final_pages)
-            + "')"
+            f"{__name__}(input_dir='{input_dir}', max_num_files={max_num_files}, "
+            f"record_limit={record_limit}, max_initial_pages={max_initial_pages}, "
+            f"max_final_pages={max_final_pages})"
         )
         self.input_dir = str(input_dir)
         # For now, the output directory is the same as the input directory

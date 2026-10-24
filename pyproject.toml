@@ -16,6 +16,7 @@ authors = [
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
     "Environment :: Console",
 ]
@@ -33,6 +34,7 @@ dev = [
     "flake8>=7.0",
     # Lets flake8 read its settings from [tool.flake8] below
     "Flake8-pyproject>=1.2",
+    "pre-commit>=4.0",
 ]
 
 [project.scripts]

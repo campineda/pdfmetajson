@@ -4,6 +4,8 @@ import importlib.metadata
 import os
 from pathlib import Path
 
+from pdfmetajson.pdf_meta_json import PdfMetaJson
+
 
 class CommandLineInterface:
 
@@ -58,19 +60,17 @@ class CommandLineInterface:
         parser.add_argument(
             "-n",
             "--numfiles",
-            nargs="?",
             type=int,
-            default=0,
-            help="limit of PDF files to process. All by default.",
+            default=PdfMetaJson.DEFAULT_MAX_NUM_FILES,
+            help="max PDF files to process; 0 processes all (default: %(default)s)",
         )
         # Limit of registers per Output
         parser.add_argument(
             "-l",
             "--limit",
-            nargs="?",
             type=int,
-            default=15,
-            help="Max records per JSON (default: 15)",
+            default=PdfMetaJson.DEFAULT_RECORD_LIMIT,
+            help="max records per JSON file; 0 writes a single file (default: %(default)s)",
         )
 
         # Verbose or Quite
@@ -90,8 +90,8 @@ class CommandLineInterface:
 
         return parser
 
-    def parse_arguments(self):
-        args = self.parser.parse_args()
+    def parse_arguments(self, argv=None):
+        args = self.parser.parse_args(argv)
         self._validate_arguments(args)
         return args
 
@@ -115,15 +115,13 @@ class CommandLineInterface:
             if not os.access(path, os.R_OK):
                 self.parser.error(f"Input path is not readable: {args.path}")
 
-        # Validate numfiles argument
-        if args.numfiles is not None:
-            if args.numfiles < 0:
-                self.parser.error("numfiles must be a positive integer")
+        # Validate numfiles argument (0 = no limit)
+        if args.numfiles < 0:
+            self.parser.error("numfiles must be 0 (all files) or a positive integer")
 
-        # Validate limit argument
-        if args.limit is not None:
-            if args.limit < 0:
-                self.parser.error("limit must be a positive integer")
+        # Validate limit argument (0 = single output file)
+        if args.limit < 0:
+            self.parser.error("limit must be 0 (single file) or a positive integer")
 
     def show_banner(self):
         print(f"\n{self.app_name} v{self.app_version}")
